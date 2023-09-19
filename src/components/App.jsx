@@ -1,50 +1,55 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { FeedbackOptions } from './feedbackOptions/FeedbackOptions';
 import { Section } from './section/Section';
 import { Statistics } from './statistics/Statistics';
 
-export class App extends React.Component {
-  state = {
-    good: 0,
-    neutral: 0,
-    bad: 0,
+export const App = () => {
+  const [good, setGood] = useState(0);
+  const [neutral, setNeutral] = useState(0);
+  const [bad, setBad] = useState(0);
+
+  const handleClick = type => {
+    switch (type) {
+      case 'good':
+        setGood(good + 1);
+        break;
+      case 'neutral':
+        setNeutral(neutral + 1);
+        break;
+      case 'bad':
+        setBad(bad + 1);
+        break;
+    }
   };
 
-  handleClick = type => {
-    this.setState(prev => ({ [type]: prev[type] + 1 }));
-  };
+  const countTotalFeedback = () => good + bad + neutral;
 
-  countTotalFeedback = () =>
-    this.state.good + this.state.bad + this.state.neutral;
-
-  countPositiveFeedbackPercentage = () =>
-    this.countTotalFeedback()
-      ? ((this.state.good / this.countTotalFeedback()) * 100).toFixed() + '%'
+  const countPositiveFeedbackPercentage = () =>
+    countTotalFeedback()
+      ? ((good / countTotalFeedback()) * 100).toFixed() + '%'
       : '0%';
 
-  render() {
-    return (
-      <div className="everything-container">
-        <Section title="Please leave feedback">
-          <FeedbackOptions
-            options={this.state}
-            onLeaveFeedback={this.handleClick}
+  return (
+    <div className="everything-container">
+      <Section title="Please leave feedback">
+        <FeedbackOptions
+          options={{ good, neutral, bad }}
+          onLeaveFeedback={handleClick}
+        />
+      </Section>
+      {countTotalFeedback() !== 0 ? (
+        <Section title="Statistics">
+          <Statistics
+            good={good}
+            bad={bad}
+            neutral={neutral}
+            total={countTotalFeedback()}
+            positivePercentage={countPositiveFeedbackPercentage()}
           />
         </Section>
-        {this.countTotalFeedback() !== 0 ? (
-          <Section title="Statistics">
-            <Statistics
-              good={this.state.good}
-              bad={this.state.bad}
-              neutral={this.state.neutral}
-              total={this.countTotalFeedback()}
-              positivePercentage={this.countPositiveFeedbackPercentage()}
-            />
-          </Section>
-        ) : (
-          <h3>No statistics given</h3>
-        )}
-      </div>
-    );
-  }
-}
+      ) : (
+        <h3>No statistics given</h3>
+      )}
+    </div>
+  );
+};
